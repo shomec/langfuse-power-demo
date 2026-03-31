@@ -116,9 +116,9 @@ services:
       LANGFUSE_INIT_PROJECT_NAME: Enrollment Advisor Bot
       LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-pk-lf-demo-public-key}
       LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-sk-lf-demo-secret-key}
-      LANGFUSE_INIT_USER_EMAIL: demo@acmesaas.com
-      LANGFUSE_INIT_USER_NAME: Demo User
-      LANGFUSE_INIT_USER_PASSWORD: demo-password-123
+      LANGFUSE_INIT_USER_EMAIL: admin@daffyduck.edu
+      LANGFUSE_INIT_USER_NAME: DDC Admin
+      LANGFUSE_INIT_USER_PASSWORD: GoFightingDucks!
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/public/health"]
       interval: 20s

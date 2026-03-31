@@ -152,7 +152,7 @@ docker compose logs -f backend
 ### Step 6 — Open Langfuse side-by-side
 
 1. Open **http://localhost:3001** in a second tab
-2. Login: `demo@acmesaas.com` / `demo-password-123`
+2. Login: `admin@daffyduck.edu` / `GoFightingDucks!`
 3. Navigate to **Traces** — every message you send in OpenWebUI appears here in real time
 
 ---
