@@ -7,34 +7,7 @@ A fully local, Docker-composable stack that demonstrates how **Langfuse** provid
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Browser / User                          │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-                    ┌───────────▼───────────┐
-                    │  OpenWebUI  :3000      │   Chat Interface
-                    │  (open-webui/open-     │
-                    │   webui:main)          │
-                    └───────────┬───────────┘
-                                │  OpenAI-compatible API call
-                    ┌───────────▼───────────┐
-                    │  RAG Backend  :8000    │   FastAPI + LlamaIndex
-                    │  (custom Python app)   │◄──── Langfuse SDK
-                    └───┬───────────────┬───┘
-                        │               │
-           ┌────────────▼───┐     ┌─────▼──────────┐
-           │ Weaviate :8080 │     │ Ollama :11434   │
-           │ Vector Store   │     │ LLM + Embeddings│
-           │ (CustomerFAQ   │     │ qwen3.5:cloud   │
-           │  collection)   │     │ qwen3-emb:4b    │
-           └────────────────┘     └─────────────────┘
-                                          │
-                    ┌─────────────────────▼───────────────────────┐
-                    │           Langfuse UI  :3001                 │
-                    │  Traces · Tokens · Latency · Sessions        │
-                    └──────────────────────────────────────────────┘
-```
+![System Architecture Diagram](docs/architecture.png)
 
 ---
 
