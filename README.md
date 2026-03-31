@@ -1,7 +1,7 @@
 # 🦆 Daffy Duck College — Enrollment Advisor Bot
 ### AI-Powered Enrollment Chatbot — Langfuse Observability Showcase
 
-A fully local, Docker-composable stack that demonstrates how **Langfuse** provides end-to-end observability over a production-grade RAG chatbot. Here, the chatbot acts as an **enrollment advisor** for **Daffy Duck College**, answering prospective student questions about admissions, financial aid, programs, registration, campus life, and more. Every interaction is traced, tokenized, scored, and visible in the Langfuse dashboard — side-by-side with your conversation in OpenWebUI.
+A fully local, Docker-composable stack that demonstrates how **Langfuse** provides end-to-end observability over a production-grade RAG chatbot. Here, the chatbot acts as an **enrollment advisor** for an imaginary college named **Daffy Duck College**, answering prospective student questions about admissions, financial aid, programs, registration, campus life, and more. Every interaction is traced, tokenized, scored, and visible in the Langfuse dashboard — side-by-side with your conversation in OpenWebUI.
 
 ---
 
