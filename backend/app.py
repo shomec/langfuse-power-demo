@@ -157,6 +157,81 @@ def estimate_tokens(text: str) -> int:
     return max(1, len(text) // 4)
 
 
+async def evaluate_response_async(
+    trace,
+    user_query: str,
+    context: str,
+    answer: str,
+) -> None:
+    """
+    LLM-as-a-judge: call Ollama to score the generated answer on:
+      - faithfulness     : does the answer only use info from context? (1=faithful)
+      - groundedness     : is the answer supported by the context?    (1=grounded)
+      - hallucination_score: does the answer contain invented info?   (1=hallucinated)
+    Posts scores directly to the Langfuse trace.
+    Runs as a background task so it does not block the HTTP response.
+    """
+    eval_prompt = f"""You are an objective AI evaluator. Evaluate the following AI-generated answer for a college enrollment chatbot.
+
+Student Question: {user_query}
+
+Retrieved Context (the ONLY source the AI should use):
+{context}
+
+AI-Generated Answer:
+{answer}
+
+Score each dimension from 0.0 to 1.0. Return ONLY a valid JSON object — no extra text.
+
+- faithfulness: Does the answer contain ONLY information from the context? 1.0 = perfectly faithful, 0.0 = completely fabricated.
+- groundedness: Is every claim in the answer directly supported by the context? 1.0 = fully grounded, 0.0 = not grounded at all.
+- hallucination_score: Does the answer contain information NOT present in the context? 1.0 = fully hallucinated, 0.0 = no hallucination.
+
+Return exactly this JSON (replace values):
+{{"faithfulness": 0.0, "groundedness": 0.0, "hallucination_score": 0.0}}"""
+
+    try:
+        async with httpx.AsyncClient(timeout=90.0) as client:
+            resp = await client.post(
+                f"{OLLAMA_BASE_URL}/api/chat",
+                json={
+                    "model": LLM_MODEL,
+                    "messages": [{"role": "user", "content": eval_prompt}],
+                    "stream": False,
+                    "format": "json",
+                },
+            )
+        raw = resp.json().get("message", {}).get("content", "{}")
+        scores = json.loads(raw)
+
+        valid_keys = {"faithfulness", "groundedness", "hallucination_score"}
+        for name, value in scores.items():
+            if name in valid_keys:
+                clamped = max(0.0, min(1.0, float(value)))
+                comment_map = {
+                    "faithfulness": (
+                        "High: answer stays within context" if clamped >= 0.7
+                        else "Low: answer may contain off-context information"
+                    ),
+                    "groundedness": (
+                        "High: claims well-supported by retrieved docs" if clamped >= 0.7
+                        else "Low: claims lack support in retrieved docs"
+                    ),
+                    "hallucination_score": (
+                        "High: answer appears hallucinated ⚠️" if clamped >= 0.5
+                        else "Low: answer appears grounded"
+                    ),
+                }
+                trace.score(
+                    name=name,
+                    value=clamped,
+                    comment=f"LLM-as-a-judge ({LLM_MODEL}) — {comment_map[name]}",
+                )
+        print(f"✅  Evaluation scores posted: {scores}")
+    except Exception as exc:
+        print(f"⚠️  LLM-as-judge evaluation failed: {exc}")
+
+
 # ── Main chat endpoint ────────────────────────────────────────────────────────
 
 @app.post("/v1/chat/completions")
@@ -279,14 +354,15 @@ async def chat_completions(request: Request):
             },
         )
 
-        # ── Score the trace ───────────────────────────────────────────────────
-        # Low retrieval score → potential hallucination indicator
-        if retrieval_score < 0.5:
-            trace.score(
-                name="retrieval-confidence",
-                value=retrieval_score,
-                comment="Low retrieval score — possible hallucination risk",
-            )
+        # ── Retrieval confidence score (always posted for score distribution) ─
+        trace.score(
+            name="retrieval-confidence",
+            value=retrieval_score,
+            comment=(
+                "Good retrieval match" if retrieval_score >= 0.5
+                else "Low retrieval score — possible hallucination risk"
+            ),
+        )
 
         # ── End trace ─────────────────────────────────────────────────────────
         trace.update(
@@ -295,6 +371,16 @@ async def chat_completions(request: Request):
                 "total_latency_ms": round((time.perf_counter() - t_retrieval_start) * 1000, 2),
                 "demo_mode": demo_mode,
             },
+        )
+
+        # ── LLM-as-judge evaluation (async background — does not block response)
+        asyncio.create_task(
+            evaluate_response_async(
+                trace=trace,
+                user_query=user_query,
+                context=context_text,
+                answer=assistant_text,
+            )
         )
 
     except Exception as exc:

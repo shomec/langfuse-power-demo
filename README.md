@@ -248,7 +248,59 @@ What GPA do I need to maintain good academic standing?
 
 ---
 
+## 📊 Langfuse Dashboard & Metrics
+
+Open Langfuse at **http://localhost:3001** → **Dashboard** (left menu) to see all built-in charts automatically populated as you run the demo scenarios.
+
+### Built-in Metrics
+
+| Metric | Dashboard location | What to look for |
+|---|---|---|
+| **Trace counts** | Dashboard → *Traces* chart | Volume per time bucket; spikes during test runs |
+| **Latency — average** | Dashboard → *Latency* chart | Baseline ~2–5 s for happy path |
+| **Latency — P95** | Dashboard → *Latency* chart (toggle percentile) | Should spike to ~9–10 s after `[SLOW]` messages |
+| **Token usage** | Dashboard → *Token Usage* chart | Prompt + completion tokens per model |
+| **Model usage** | Dashboard → *Model* breakdown | Confirms `qwen3.5:cloud` is logged correctly |
+| **Score distributions** | Dashboard → *Scores* section | Shows histogram across all score names |
+
+> [!TIP]
+> Use the **time-range picker** (top-right of Dashboard) and the **Tag filter** (`happy`, `slow`, `hallucinate`) to slice metrics per scenario side-by-side.
+
+---
+
+### LLM-as-a-Judge Evaluation Scores
+
+After every chat message the backend fires an async **LLM-as-a-judge** call back to Ollama. The same `qwen3.5:cloud` model reads the question, retrieved context, and generated answer, then returns three scores in JSON. These are posted to the Langfuse trace automatically.
+
+| Score name | Range | Meaning |
+|---|---|---|
+| `faithfulness` | 0.0 – 1.0 | Does the answer use **only** information from the retrieved context? (1.0 = perfectly faithful) |
+| `groundedness` | 0.0 – 1.0 | Is every claim in the answer **directly supported** by the retrieved docs? (1.0 = fully grounded) |
+| `hallucination_score` | 0.0 – 1.0 | Does the answer contain information **not present** in the context? (1.0 = fully hallucinated) |
+| `retrieval-confidence` | 0.0 – 1.0 | Weaviate cosine similarity of the top retrieved chunk (proxy for retrieval quality) |
+
+#### Where to see scores in Langfuse
+
+1. **Per-trace view** → click any trace → **Scores** tab → all four scores with their auto-generated comments
+2. **Score distributions** → Dashboard → *Scores* section → histogram per score name
+3. **Filtering by score** → Traces table → click **Filters** → *Score* → set `hallucination_score > 0.5` to surface suspicious traces instantly
+4. **Comparing scenarios** → filter `tag=hallucinate` and note how `faithfulness` and `groundedness` drop vs `tag=happy`
+
+#### Expected score patterns per scenario
+
+| Scenario | `faithfulness` | `groundedness` | `hallucination_score` | `retrieval-confidence` |
+|---|---|---|---|---|
+| ✅ Happy path | 0.8 – 1.0 | 0.8 – 1.0 | 0.0 – 0.2 | 0.6 – 1.0 |
+| 🐌 Slow | Same as happy (delay only) | Same as happy | Same as happy | Same as happy |
+| 🤔 Hallucinate | 0.0 – 0.3 | 0.0 – 0.3 | 0.7 – 1.0 | 0.0 – 0.3 |
+
+> [!NOTE]
+> Evaluation scores appear **a few seconds after** the chat response because the judge call runs as an async background task — refresh the trace in Langfuse to see them populate.
+
+---
+
 ## 🗺️ Langfuse Feature Reference
+
 
 | Feature | Where to find it in the UI |
 |---|---|
