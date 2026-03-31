@@ -1,7 +1,7 @@
-# 🚀 Langfuse Power Demo
-### Customer Support Chatbot — AI Observability Showcase
+# 🦆 Daffy Duck College — Enrollment Advisor Bot
+### AI-Powered Enrollment Chatbot — Langfuse Observability Showcase
 
-A fully local, Docker-composable stack that demonstrates how **Langfuse** provides end-to-end observability over a production-grade RAG chatbot. Every interaction is traced, tokenized, scored, and visible in the Langfuse dashboard — side-by-side with your conversation in OpenWebUI.
+A fully local, Docker-composable stack that demonstrates how **Langfuse** provides end-to-end observability over a production-grade RAG chatbot. Here, the chatbot acts as an **enrollment advisor** for **Daffy Duck College**, answering prospective student questions about admissions, financial aid, programs, registration, campus life, and more. Every interaction is traced, tokenized, scored, and visible in the Langfuse dashboard — side-by-side with your conversation in OpenWebUI.
 
 ---
 
@@ -14,18 +14,18 @@ A fully local, Docker-composable stack that demonstrates how **Langfuse** provid
 ## 🧱 Tech Stack
 
 ### 1. [OpenWebUI](https://github.com/open-webui/open-webui)
-**Role:** Chat frontend  
-OpenWebUI is an open-source, ChatGPT-like interface that connects to any OpenAI-compatible API. In this demo it serves as the user-facing chat window. Users type questions here; OpenWebUI forwards them to the RAG Backend.
+**Role:** Chat frontend
+OpenWebUI is an open-source, ChatGPT-like interface that connects to any OpenAI-compatible API. In this demo it serves as the student-facing enrollment chat window. Users type questions here; OpenWebUI forwards them to the RAG Backend.
 
 ---
 
 ### 2. [Ollama](https://ollama.com/)
-**Role:** Local LLM + Embedding server  
+**Role:** Local LLM + Embedding server
 Ollama runs large language models locally with no cloud dependency. It exposes an OpenAI-compatible HTTP API.
 
 | Model | Purpose |
 |---|---|
-| `qwen3.5:cloud` | Main conversational LLM — generates answers |
+| `qwen3.5:cloud` | Main conversational LLM — generates advisor responses |
 | `qwen3-embedding:4b` | Converts text into vector embeddings for Weaviate |
 
 Both models are **automatically pulled** on first `docker compose up`.
@@ -33,29 +33,29 @@ Both models are **automatically pulled** on first `docker compose up`.
 ---
 
 ### 3. [Weaviate](https://weaviate.io/)
-**Role:** Vector database (RAG knowledge store)  
-Weaviate stores the embedded FAQ chunks in a collection called `CustomerFAQ`. At query time, the backend converts the user's question into a vector embedding and performs a similarity search to retrieve the most relevant FAQ entries as context.
+**Role:** Vector database (RAG knowledge store)
+Weaviate stores the embedded FAQ chunks in a collection called `CustomerFAQ`. At query time, the backend converts the student's question into an embedding and performs a similarity search to retrieve the most relevant FAQ entries as context.
 
 ---
 
 ### 4. [LlamaIndex](https://www.llamaindex.ai/)
-**Role:** RAG orchestration framework  
+**Role:** RAG orchestration framework
 LlamaIndex handles:
 - **Ingestion**: reads `faqs.csv` → splits into chunks → generates embeddings → stores in Weaviate
-- **Retrieval**: at query time, queries Weaviate for the top-3 similar chunks
+- **Retrieval**: at query time, queries Weaviate for the top-3 similar FAQ chunks
 - **Query Engine**: wraps retrieval + generation into a single pipeline
 
 ---
 
 ### 5. [Langfuse](https://langfuse.com/)
-**Role:** LLM observability & AI ops platform  
+**Role:** LLM observability & AI ops platform
 Langfuse is the star of this demo. It captures:
 - **Traces** — one per chat message, with full input/output
 - **Spans** — nested timeline of retrieval and generation steps
 - **Token usage** — prompt tokens, completion tokens, totals
 - **Latency** — per-span timing breakdown
 - **Scores** — automatic retrieval confidence score for hallucination detection
-- **Sessions** — groups traces by user conversation
+- **Sessions** — groups traces by student conversation
 - **Prompt versioning** — the system prompt is registered as a named, versioned prompt
 
 Langfuse runs locally via Docker (Postgres + ClickHouse backend).
@@ -63,15 +63,17 @@ Langfuse runs locally via Docker (Postgres + ClickHouse backend).
 ---
 
 ### 6. Knowledge Base (`knowledge_base/faqs.csv`)
-50 hand-crafted FAQ entries across 5 categories:
+50 enrollment FAQs across 7 categories:
 
 | Category | Topic examples |
 |---|---|
-| Account | Sign up, password reset, 2FA, profile settings |
-| Billing | Payment methods, plans, upgrades, refunds, invoices |
-| Technical | Browser support, file upload limits, API, data export |
-| Integrations | Slack, Google Workspace, Zapier, Salesforce, Webhooks |
-| Security | Encryption, SOC 2, GDPR, HIPAA, IP allowlist |
+| Admissions | How to apply, deadlines, GPA requirements, test-optional policy, transfer students |
+| Financial Aid | FAFSA, scholarships, payment plans, work-study, appeals |
+| Programs | Undergraduate & graduate programs, online options, double major, Honors Program |
+| Registration | How to register, add/drop deadlines, credit limits, withdrawal policy |
+| Campus Life | Housing, meal plans, student clubs, health center, athletics |
+| International Students | F-1 visa, I-20, TOEFL/IELTS requirements, on-campus work |
+| Academics | Grading scale, good standing GPA, transcripts, tutoring, graduation |
 
 ---
 
@@ -88,7 +90,7 @@ Langfuse runs locally via Docker (Postgres + ClickHouse backend).
 
 ## 🛠️ Step-by-Step Setup
 
-### Step 1 — Clone / navigate to the project
+### Step 1 — Navigate to the project
 
 ```bash
 cd /path/to/langfuse-power-demo
@@ -98,9 +100,8 @@ cd /path/to/langfuse-power-demo
 
 ```bash
 cp .env.example .env
+# Edit .env if you want to change secret keys (defaults work out of the box)
 ```
-
-The defaults in `.env.example` work out of the box. For production, rotate the secret keys.
 
 ### Step 3 — Start the full stack
 
@@ -120,13 +121,13 @@ This starts 8 containers in dependency order:
 ### Step 4 — Monitor startup
 
 ```bash
-# Watch all containers come up
+# Check all containers
 docker compose ps
 
-# Watch Ollama pull the models (takes 5-10 min first time)
+# Watch Ollama pull the models (5-10 min first time)
 docker compose logs -f ollama
 
-# Watch the knowledge base being embedded (runs after Ollama is ready)
+# Watch the knowledge base being embedded
 docker compose logs -f ingest
 
 # Watch the RAG backend start
@@ -137,22 +138,22 @@ docker compose logs -f backend
 
 ### Step 5 — Connect OpenWebUI to the RAG backend
 
-> This is a one-time manual step — OpenWebUI doesn't support auto-configuration via environment on first boot.
+> One-time manual step after first boot.
 
 1. Open **http://localhost:3000**
-2. Skip sign-in (authentication is disabled for the demo)
+2. Skip sign-in (auth is disabled for demo)
 3. Click your **avatar (top-right) → Settings → Connections**
 4. Under **OpenAI API**, set:
    - **API Base URL**: `http://backend:8000/v1`
    - **API Key**: `demo-key`
 5. Click **Save** ✅
-6. In the model selector dropdown (top of chat), choose **"rag"**
+6. In the model selector (top of chat), choose **"rag"**
 
-### Step 6 — Open Langfuse (side-by-side)
+### Step 6 — Open Langfuse side-by-side
 
-1. Open **http://localhost:3001** in a second window/tab
+1. Open **http://localhost:3001** in a second tab
 2. Login: `demo@acmesaas.com` / `demo-password-123`
-3. Navigate to **Traces** — every message you send in OpenWebUI will appear here in real time
+3. Navigate to **Traces** — every message you send in OpenWebUI appears here in real time
 
 ---
 
@@ -160,31 +161,32 @@ docker compose logs -f backend
 
 ---
 
-### ✅ Scenario 1: Happy Path (Normal RAG)
+### ✅ Scenario 1: Happy Path (Normal Enrollment Q&A)
 
 **What it tests:** Normal knowledge base retrieval + grounded answer generation.
 
 **How to trigger:** Ask any question covered by the FAQ knowledge base.
 
-**Example prompts to try:**
+**Example prompts:**
 ```
-How do I reset my password?
-What payment methods do you accept?
-Is AcmeSaaS SOC 2 compliant?
-How do I enable two-factor authentication?
-Does AcmeSaaS have a mobile app?
-Can I connect AcmeSaaS to Salesforce?
+How do I apply to Daffy Duck College?
+What is the application deadline for fall enrollment?
+Are there scholarships for first-generation college students?
+What meal plans are available?
+Do international students need a visa?
+How do I register for classes?
+What GPA do I need to maintain good academic standing?
 ```
 
 **What you see in Langfuse:**
 
-1. Go to **Traces** → click the latest trace
+1. Go to **Traces** → click the latest trace named `enrollment-advisor-chat`
 2. You'll see a **timeline with two nested spans**:
-   - `weaviate-retrieval` — how long it took to find relevant FAQs
-   - `ollama-generation` — how long the LLM took to write the answer
+   - `weaviate-retrieval` — time taken to find relevant FAQ chunks
+   - `ollama-generation` — time taken by the LLM to write the response
 3. Click the **Generation span** → **Usage** tab → shows prompt tokens, completion tokens, total
-4. The trace **Input** shows the raw user question; **Output** shows the answer
-5. Navigate to **Sessions** → you'll see the conversation grouped by session
+4. The trace **Input** shows the student's question; **Output** shows the advisor's answer
+5. Navigate to **Sessions** → each OpenWebUI conversation is one session
 
 **Langfuse features visible:** Prompt tracking, token usage, latency breakdown, session tracing
 
@@ -192,55 +194,55 @@ Can I connect AcmeSaaS to Salesforce?
 
 ### 🐌 Scenario 2: Poor Latency (Slow Response)
 
-**What it tests:** How Langfuse surfaces latency outliers and lets you isolate which step is slow.
+**What it tests:** How Langfuse surfaces latency outliers and isolates which step is slow.
 
 **How to trigger:** Prefix your message with `[SLOW]`
 
 **Example prompts:**
 ```
-[SLOW] How do I export my data?
-[SLOW] What is your uptime guarantee?
-[SLOW] How do I cancel my subscription?
+[SLOW] How do I apply for financial aid?
+[SLOW] What programs does Daffy Duck College offer?
+[SLOW] How do I request an official transcript?
 ```
 
-**What happens under the hood:** The backend injects a 4-second artificial sleep before the LLM call. This mimics a real-world scenario where a downstream service (e.g. a slow embedding server or overloaded LLM) causes latency spikes.
+**What happens under the hood:** A 4-second artificial sleep is injected before the LLM call, mimicking a real-world scenario such as a slow embedding server or overloaded model.
 
 **What you see in Langfuse:**
 
-1. Go to **Traces** → the slow trace will show a visibly longer **Duration** column
-2. Click the trace → **Timeline view** → you'll see a third span called `artificial-latency-delay` taking ~4 seconds
-3. Compare this timeline against a happy-path trace — the retrieval span is fast; the bottleneck is clearly isolated to the delay span
-4. Use **Filters → Tag → slow** to surface all slow-mode traces in bulk
-5. In a production setting, this is where you'd use Langfuse to pinpoint which service or model is causing slowness
+1. Go to **Traces** → the slow trace shows a visibly longer **Duration** column
+2. Click the trace → **Timeline view** → a third span `artificial-latency-delay` takes ~4 seconds
+3. Compare this timeline against a happy-path trace — the retrieval span is fast; the bottleneck is isolated
+4. Filter by **Tag → slow** to surface all slow-mode traces in bulk
+5. In production, this is where you'd use Langfuse to identify which service causes latency
 
-**Langfuse features visible:** Latency breakdown per span, outlier detection via Duration column, tag-based filtering
+**Langfuse features visible:** Latency breakdown per span, outlier detection, tag-based filtering
 
 ---
 
 ### 🤔 Scenario 3: Hallucination Detection
 
-**What it tests:** How Langfuse helps you detect when the LLM makes up information (answers questions not covered by the knowledge base).
+**What it tests:** How Langfuse helps detect when the LLM makes up information not in the knowledge base.
 
 **How to trigger:** Prefix your message with `[HALLUCINATE]`
 
 **Example prompts:**
 ```
-[HALLUCINATE] What is AcmeSaaS's stock price and P/E ratio?
-[HALLUCINATE] Tell me about your real estate investment portfolio
-[HALLUCINATE] Who are AcmeSaaS's top 5 competitors and their market share?
+[HALLUCINATE] How does Daffy Duck College rank against MIT?
+[HALLUCINATE] What are the NBA draft prospects from Daffy Duck College?
+[HALLUCINATE] Tell me about Daffy Duck College's quantum computing research lab
 ```
 
-**What happens under the hood:** The backend intercepts the message, replaces it with an off-domain financial question (not in the knowledge base), and sends it to the LLM anyway. The LLM has no relevant context but may still generate a plausible-sounding (but fabricated) answer.
+**What happens under the hood:** The backend intercepts the message and sends an out-of-scope question to the LLM with no matching context in Weaviate. The LLM may still generate a plausible-sounding but fabricated answer.
 
 **What you see in Langfuse:**
 
 1. Go to **Traces** → click the hallucinate-tagged trace
-2. Under the `weaviate-retrieval` span → **Output** → `top_score` will be very low (< 0.5)
-3. The trace will have a **Score** called `retrieval-confidence` with a value < 0.5 and comment: _"Low retrieval score — possible hallucination risk"_
-4. Look at the `preview` field in the retrieval span — it will show unrelated FAQ chunks (or none), confirming no good context was found
+2. Under `weaviate-retrieval` → **Output** → `top_score` will be very low (< 0.5)
+3. The trace will have a **Score** called `retrieval-confidence` with value < 0.5 and comment: _"Low retrieval score — possible hallucination risk"_
+4. Look at the `preview` field in the retrieval span — unrelated or no matching chunks were found
 5. The generated answer may still sound confident — this is the hallucination
-6. Use **Filters → Tag → hallucinate** to find all such traces
-7. In production, you'd hook this score to an alert or human review queue
+6. Filter by **Tag → hallucinate** to find all flagged conversations
+7. In production, hook this score to an alert or human-review queue
 
 **Langfuse features visible:** Retrieval confidence scoring, hallucination risk flagging, annotation/scoring system
 
@@ -254,7 +256,7 @@ Can I connect AcmeSaaS to Salesforce?
 | **Token usage + cost** | Traces → any trace → Generation span → **Usage** tab |
 | **Latency breakdown** | Traces → any trace → **Timeline** view (nested spans) |
 | **Hallucination debugging** | Traces → filter `tag=hallucinate` → check **Scores** column |
-| **User session tracing** | Left menu → **Sessions** → select any session → full conversation history |
+| **Session tracing** | Left menu → **Sessions** → select any session → full conversation |
 | **Score / annotation** | Traces → any trace → **Scores** tab |
 
 ---
@@ -265,26 +267,26 @@ Can I connect AcmeSaaS to Salesforce?
 # Happy path
 curl -s -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"rag","messages":[{"role":"user","content":"How do I reset my password?"}]}' \
+  -d '{"model":"rag","messages":[{"role":"user","content":"How do I apply to Daffy Duck College?"}]}' \
   | jq .choices[0].message.content
 
 # Slow path (watch Langfuse latency spike)
 curl -s -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"rag","messages":[{"role":"user","content":"[SLOW] How do I export my data?"}]}' \
+  -d '{"model":"rag","messages":[{"role":"user","content":"[SLOW] What financial aid is available?"}]}' \
   | jq .
 
-# Hallucination path (watch Langfuse score drop)
+# Hallucination path (watch Langfuse retrieval score drop)
 curl -s -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"rag","messages":[{"role":"user","content":"[HALLUCINATE] What is your stock price?"}]}' \
+  -d '{"model":"rag","messages":[{"role":"user","content":"[HALLUCINATE] How does DDC rank against MIT?"}]}' \
   | jq .
 
 # Verify Weaviate has the FAQ data
 curl -s "http://localhost:8080/v1/objects?class=CustomerFAQ&limit=3" \
   | jq '.objects[].properties.question'
 
-# Backend health check
+# Backend health
 curl http://localhost:8000/health
 ```
 
@@ -296,7 +298,7 @@ curl http://localhost:8000/health
 # Stop containers but keep data volumes (faster restart next time)
 docker compose down
 
-# Full reset — removes all volumes (models, embeddings, traces)
+# Full reset — removes all volumes (models, embeddings, Langfuse traces)
 docker compose down -v
 ```
 
@@ -309,19 +311,21 @@ langfuse-power-demo/
 ├── .env.example                   Environment variable template
 ├── docker-compose.yml             8-service stack definition
 ├── README.md                      This file
+├── docs/
+│   └── architecture.png           System architecture diagram
 │
 ├── knowledge_base/
-│   └── faqs.csv                   50 FAQ entries across 5 categories
+│   └── faqs.csv                   50 enrollment FAQs (7 categories)
 │
 ├── ingest/
-│   ├── ingest.py                  LlamaIndex ingestion pipeline
-│   ├── requirements.txt           Python dependencies
-│   └── Dockerfile                 One-shot init container
+│   ├── ingest.py                  LlamaIndex ingestion pipeline → Weaviate
+│   ├── requirements.txt
+│   └── Dockerfile
 │
 └── backend/
     ├── app.py                     FastAPI RAG backend + Langfuse tracing
-    ├── requirements.txt           Python dependencies
-    └── Dockerfile                 Backend container
+    ├── requirements.txt
+    └── Dockerfile
 ```
 
 ---
@@ -331,7 +335,7 @@ langfuse-power-demo/
 | Problem | Fix |
 |---|---|
 | Ollama models not pulled | `docker compose logs ollama` — wait for `✅ Ollama models ready` |
-| Ingest container fails | Run `docker compose logs ingest` — Ollama may not be ready yet; re-run with `docker compose restart ingest` |
+| Ingest container fails | `docker compose logs ingest` — Ollama may not be ready; run `docker compose restart ingest` |
 | OpenWebUI shows no models | Confirm backend is healthy: `curl http://localhost:8000/health` |
 | Langfuse shows no traces | Check backend logs: `docker compose logs backend` |
-| `qwen3.5:cloud` not found | This model requires Ollama ≥ 0.5. Run `docker compose pull ollama` to get the latest image |
+| `qwen3.5:cloud` not found | Requires Ollama ≥ 0.5. Run `docker compose pull ollama` to update |

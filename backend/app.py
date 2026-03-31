@@ -3,9 +3,10 @@
 Langfuse Power Demo — RAG Backend
 OpenAI-compatible FastAPI endpoint that:
   - Retrieves context from Weaviate (LlamaIndex)
-  - Calls Ollama qwen2.5:7b for generation
+  - Calls Ollama qwen3.5:cloud for generation
   - Traces every step in Langfuse (traces, spans, token usage)
   - Supports demo scenarios: happy | slow | hallucinate
+  - Use case: Daffy Duck College Enrollment Chatbot
 """
 
 import asyncio
@@ -43,9 +44,9 @@ LANGFUSE_HOST       = os.getenv("LANGFUSE_HOST", "http://langfuse-server:3000")
 PROMPT_NAME = "customer-support-v1"
 
 # System prompt (also registered in Langfuse as a named prompt on startup)
-BASE_SYSTEM_PROMPT = """You are a helpful customer support agent for AcmeSaaS.
+BASE_SYSTEM_PROMPT = """You are a friendly and knowledgeable enrollment advisor for Daffy Duck College.
 Answer questions accurately and concisely based ONLY on the provided context.
-If the context does not contain the answer, say: "I'm sorry, I don't have information about that. Please contact support@acmesaas.com for further assistance."
+If the context does not contain the answer, say: "I'm sorry, I don't have that information. Please contact our Enrollment Office at enroll@daffyduck.edu or call (555) 325-3393 for further assistance."
 Never make up information that is not in the context.
 Context:
 {context}"""
@@ -121,7 +122,7 @@ async def lifespan(app: FastAPI):
     print("👋  Backend shutdown.")
 
 
-app = FastAPI(title="Langfuse Power Demo — RAG Backend", lifespan=lifespan)
+app = FastAPI(title="Langfuse Power Demo — Daffy Duck College Enrollment Bot", lifespan=lifespan)
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -179,16 +180,16 @@ async def chat_completions(request: Request):
 
     # ── For hallucinate mode substitute an off-domain question ───────────────
     if demo_mode == "hallucinate":
-        user_query = user_query or "What are the stock market predictions for AcmeSaaS next quarter and what is their P/E ratio?"
+        user_query = user_query or "What are the admission requirements for Harvard Medical School and how does Daffy Duck College compare to MIT in research output rankings?"
 
     # ── Start Langfuse Trace ─────────────────────────────────────────────────
     trace = langfuse.trace(
-        name="customer-support-chat",
+        name="enrollment-advisor-chat",
         session_id=session_id,
         user_id=user_id,
         input={"query": user_query, "demo_mode": demo_mode},
         tags=[demo_mode, f"model:{model}"],
-        metadata={"llm_model": LLM_MODEL, "embed_model": EMBED_MODEL},
+        metadata={"llm_model": LLM_MODEL, "embed_model": EMBED_MODEL, "college": "Daffy Duck College"},
     )
 
     try:
@@ -365,7 +366,7 @@ async def list_models():
                 "object": "model",
                 "created": 1700000000,
                 "owned_by": "langfuse-demo",
-                "display_name": "AcmeSaaS Customer Support (RAG)",
+                "display_name": "Daffy Duck College Enrollment Advisor (RAG)",
             }
         ],
     }

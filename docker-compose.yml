@@ -111,9 +111,9 @@ services:
       LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: "true"
       # Pre-create a project key pair for the demo
       LANGFUSE_INIT_ORG_ID: demo-org
-      LANGFUSE_INIT_ORG_NAME: AcmeSaaS Demo
+      LANGFUSE_INIT_ORG_NAME: Daffy Duck College
       LANGFUSE_INIT_PROJECT_ID: demo-project
-      LANGFUSE_INIT_PROJECT_NAME: Customer Support Bot
+      LANGFUSE_INIT_PROJECT_NAME: Enrollment Advisor Bot
       LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-pk-lf-demo-public-key}
       LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-sk-lf-demo-secret-key}
       LANGFUSE_INIT_USER_EMAIL: demo@acmesaas.com
@@ -192,7 +192,7 @@ services:
       # Disable Ollama direct connection (we proxy via backend)
       ENABLE_OLLAMA_API: "false"
       WEBUI_AUTH: "false"
-      WEBUI_NAME: "AcmeSaaS Customer Support Demo"
+      WEBUI_NAME: "Daffy Duck College Enrollment Advisor"
     volumes:
       - open_webui_data:/app/backend/data
 
