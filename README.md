@@ -34,7 +34,7 @@ Both models are **automatically pulled** on first `docker compose up`.
 
 ### 3. [Weaviate](https://weaviate.io/)
 **Role:** Vector database (RAG knowledge store)
-Weaviate stores the embedded FAQ chunks in a collection called `CustomerFAQ`. At query time, the backend converts the student's question into an embedding and performs a similarity search to retrieve the most relevant FAQ entries as context.
+Weaviate stores the embedded FAQ chunks in a collection called `EnrollmentFAQ`. At query time, the backend converts the student's question into an embedding and performs a similarity search to retrieve the most relevant FAQ entries as context.
 
 ---
 
@@ -304,7 +304,7 @@ After every chat message the backend fires an async **LLM-as-a-judge** call back
 
 | Feature | Where to find it in the UI |
 |---|---|
-| **Prompt tracking** | Left menu → **Prompts** → `customer-support-v1` (versioned, editable) |
+| **Prompt tracking** | Left menu → **Prompts** → `enrollment-support-v1` (versioned, editable) |
 | **Token usage + cost** | Traces → any trace → Generation span → **Usage** tab |
 | **Latency breakdown** | Traces → any trace → **Timeline** view (nested spans) |
 | **Hallucination debugging** | Traces → filter `tag=hallucinate` → check **Scores** column |
@@ -335,7 +335,7 @@ curl -s -X POST http://localhost:8000/v1/chat/completions \
   | jq .
 
 # Verify Weaviate has the FAQ data
-curl -s "http://localhost:8080/v1/objects?class=CustomerFAQ&limit=3" \
+curl -s "http://localhost:8080/v1/objects?class=EnrollmentFAQ&limit=3" \
   | jq '.objects[].properties.question'
 
 # Backend health

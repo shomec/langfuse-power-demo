@@ -34,14 +34,14 @@ OLLAMA_BASE_URL   = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
 WEAVIATE_URL      = os.getenv("WEAVIATE_URL", "http://weaviate:8080")
 LLM_MODEL         = os.getenv("LLM_MODEL", "qwen3.5:cloud")
 EMBED_MODEL       = os.getenv("EMBED_MODEL", "qwen3-embedding:4b")
-COLLECTION_NAME   = "CustomerFAQ"
+COLLECTION_NAME   = "EnrollmentFAQ"
 
 LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY", "sk-lf-demo-secret-key")
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "pk-lf-demo-public-key")
 LANGFUSE_HOST       = os.getenv("LANGFUSE_HOST", "http://langfuse-server:3000")
 
 # Prompt name tracked in Langfuse
-PROMPT_NAME = "customer-support-v1"
+PROMPT_NAME = "enrollment-support-v1"
 
 # System prompt (also registered in Langfuse as a named prompt on startup)
 BASE_SYSTEM_PROMPT = """You are a friendly and knowledgeable enrollment advisor for Daffy Duck College.

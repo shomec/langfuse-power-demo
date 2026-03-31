@@ -21,7 +21,7 @@ from llama_index.vector_stores.weaviate import WeaviateVectorStore
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
 WEAVIATE_URL    = os.getenv("WEAVIATE_URL", "http://weaviate:8080")
 EMBED_MODEL     = os.getenv("EMBED_MODEL", "qwen3-embedding:4b")
-COLLECTION_NAME = "CustomerFAQ"
+COLLECTION_NAME = "EnrollmentFAQ"
 CSV_PATH        = os.path.join(os.path.dirname(__file__), "..", "knowledge_base", "faqs.csv")
 
 # ── Retry helper (Ollama / Weaviate may still be starting) ───────────────────
